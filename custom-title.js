@@ -1,7 +1,29 @@
 document.addEventListener('DOMContentLoaded', function() {
   function preloadLocalModel() {
     var LOCAL_MODEL_KEY = 'migan-pipeline-v2';
-    var LOCAL_MODEL_URL = '/migan_pipeline_v2.onnx';
+    
+    // 多级模型源配置（按优先级排序）
+    var MODEL_SOURCES = [
+      // 1. Cloudflare R2/Worker（全球 CDN，最快）
+      {
+        url: 'https://ai-canvas-model-proxy.your-subdomain.workers.dev/migan_pipeline_v2.onnx',
+        name: 'Cloudflare CDN',
+        priority: 1
+      },
+      // 2. 本地文件（GitHub Pages / 静态托管）
+      {
+        url: '/migan_pipeline_v2.onnx',
+        name: 'Local file',
+        priority: 2
+      },
+      // 3. HuggingFace 远程（兜底方案）
+      {
+        url: 'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx',
+        name: 'HuggingFace Remote',
+        priority: 3
+      }
+    ];
+    
     var STORE_NAME = 'modelCache';
 
     function openDB() {
@@ -34,26 +56,77 @@ document.addEventListener('DOMContentLoaded', function() {
         tx.onerror = function() { reject(tx.error); };
       });
     }
+    
+    // 尝试从多个源下载模型
+    async function tryDownloadFromSources(sources) {
+      for (var i = 0; i < sources.length; i++) {
+        var source = sources[i];
+        
+        try {
+          console.log('[AI Canvas] Trying source #' + source.priority + ': ' + source.name + ' (' + source.url + ')');
+          
+          var startTime = Date.now();
+          var response = await fetch(source.url, {
+            method: 'GET',
+            cache: 'default'
+          });
+          
+          if (!response.ok) {
+            console.warn('[AI Canvas] Source failed (' + response.status + '): ' + source.name);
+            continue;
+          }
+          
+          var buffer = await response.arrayBuffer();
+          var duration = ((Date.now() - startTime) / 1000).toFixed(1);
+          
+          console.log(
+            '%c[AI Canvas] ✅ Download successful from ' + source.name + 
+            ' (' + (buffer.byteLength / 1024 / 1024).toFixed(1) + ' MB in ' + duration + 's)',
+            'color: #10b981; font-weight: bold;'
+          );
+          
+          return buffer;
+          
+        } catch (error) {
+          console.warn('[AI Canvas] Source error: ' + source.name + ' - ' + error.message);
+          continue;
+        }
+      }
+      
+      throw new Error('All sources failed');
+    }
 
     openDB().then(function(db) {
       return checkModelExists(db).then(function(exists) {
-        if (exists) { db.close(); return; }
-        console.log('[AI Canvas] Preloading local ONNX model...');
-        return fetch(LOCAL_MODEL_URL).then(function(res) {
-          if (!res.ok) throw new Error('Local model fetch failed: ' + res.status);
-          return res.arrayBuffer();
-        }).then(function(buffer) {
+        if (exists) { 
+          console.log('%c[AI Canvas] 🚀 Model already cached, skipping download', 
+            'color: #3b82f6; font-weight: bold;');
+          db.close(); 
+          return; 
+        }
+        
+        console.log('%c[AI Canvas] Preloading ONNX model...', 
+          'color: #f59e0b; font-weight: bold;');
+        
+        return tryDownloadFromSources(MODEL_SOURCES).then(function(buffer) {
           return saveModelToDB(db, buffer);
-        }).then(function() {
-          console.log('[AI Canvas] Local ONNX model cached successfully (' + (buffer.byteLength / 1024 / 1024).toFixed(1) + ' MB)');
+        }).then(function(buffer) {
+          console.log(
+            '%c[AI Canvas] 💾 Model cached to IndexedDB successfully! Next visit will be instant.', 
+            'color: #10b981; font-weight: bold;'
+          );
           db.close();
         }).catch(function(err) {
-          console.warn('[AI Canvas] Model preload failed, will fallback to remote:', err.message || err);
+          console.warn(
+            '%c[AI Canvas] ⚠️ Model preload failed: ' + err.message + 
+            '\nWill fallback to remote on first use.',
+            'color: #ef4444;'
+          );
           db.close();
         });
       });
     }).catch(function(err) {
-      console.warn('[AI Canvas] Cannot access IndexedDB for model preload:', err.message || err);
+      console.warn('[AI Canvas] Cannot access IndexedDB:', err.message || err);
     });
   }
 

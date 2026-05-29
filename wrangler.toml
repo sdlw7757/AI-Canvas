@@ -1,0 +1,13 @@
+name = "ai-canvas-model-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# R2 存储桶绑定
+[[r2_buckets]]
+binding = "AI_CANVAS_MODELS"
+bucket_name = "ai-canvas-models"
+
+# 自定义域名（可选）
+# [routes]
+# pattern = "model.yourdomain.com"
+# custom_domain = true
