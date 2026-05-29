@@ -6,16 +6,17 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/版本-1.0.0-blue?style=flat-square" alt="版本">
-  <img src="https://img.shields.io/badge/框架-React%20%2B%20TypeScript-61DAFB?style=flat-square&logo=react" alt="框架">
-  <img src="https://img.shields.io/badge/模型-ONNX%20Runtime-005FFF?style=flat-square&logo=onnx" alt="模型">
+  <img src="https://img.shields.io/badge/框架-React%20%2B%20TypeScript-61DAFB?style=flat-square"&logo=react" alt="框架">
+  <img src="https://img.shields.io/badge/模型-ONNX%20Runtime-005FFF?style=flat-square"&logo=onnx" alt="模型">
   <img src="https://img.shields.io/badge/构建-Vite-646CFF?style=flat-square&logo=vite" alt="构建">
-</p>
+</段>
 
 ---
 
+
 </div>
 
-## ✨ 功能特性
+##✨ 功能特性
 
 | 功能 | 说明 |
 |------|------|
@@ -26,9 +27,11 @@
 | 🎨 **毛玻璃界面** | 科技感毛玻璃风格，视觉体验舒适 |
 | 🚀 **本地模型优先** | 自动缓存 ONNX 模型，离线也能使用 |
 
+## 🚀 Demo 演示
+✅ **在线演示地址：** [https://5257.cc.cd/](https://5257.cc.cd/)
 ## 🖼️ 使用效果
 
-<div align="center">
+
 
 ```
 ┌─────────────────────────────────────┐
@@ -49,11 +52,11 @@
 git clone https://github.com/你的用户名/你的仓库名.git
 
 # 2. 推送到 GitHub
-git add .
+git 添加所有更改的文件
 git commit -m "初始化 AI Canvas"
-git push origin main
+git 推送 origin main
 
-# 3. 仓库 Settings → Pages → 选择 main 分支 / (root) 目录 → Save
+# 3. 仓库 设置 → 页面 → 选择 main 分支 / (root) 目录 → 保存
 # 4. 完成！访问 https://你的用户名.github.io/仓库名/
 ```
 
