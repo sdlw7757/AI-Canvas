@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var MODEL_SOURCES = [
       // 1. Cloudflare R2/Worker（全球 CDN，最快）
       {
-        url: 'https://ai-canvas-model-proxy.your-subdomain.workers.dev/migan_pipeline_v2.onnx',
+        url: 'https://ai-canvas.your-subdomain.workers.dev/migan_pipeline_v2.onnx',
         name: 'Cloudflare CDN',
         priority: 1
       },
